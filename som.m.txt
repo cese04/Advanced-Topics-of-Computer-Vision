@@ -1,0 +1,39 @@
+function [m01, m10, s01, s10, phi, m00]=som(ima)
+
+g = size(ima);
+[cx, cy] = meshgrid(1:1:g(1), 1:1:g(2));
+
+result = logical(ima);
+
+m00 = sum(sum(double(result)));
+m01 = sum(sum(double(cy' .* result)))/m00;
+m10 = sum(sum(double(cx' .* result))    )/m00;
+
+s01 = sqrt(sum(sum(double((cy' - m01) .^ 2 .* result)))/m00);
+s10 = sqrt(sum(sum(double((cx' - m10) .^ 2 .* result)))/m00);
+s11 = sqrt(sum(sum(double((cx' - m10) .* (cy'-m01) .* result)))/m00);
+
+if s10>s01
+    c=2
+    phi = .5 * atan((2 * s11 ^ 2)/(s10 ^ 2 - s01 ^ 2));
+    ang = 0:0.1:2*pi;
+    xp = m01 + 2 * s01 * cos(phi) * real(exp(1i * (ang-phi)));
+    yp = m10 + 2 * s10 * cos(phi) * imag(exp(1i * ang));
+
+elseif s01>s10
+    c=1
+    phi = .5 * atan((2 * s11 ^ 2)/(s10 ^ 2 - s01 ^ 2));
+    ang = 0:0.1:2*pi;
+    xp = m01 + 2 * s01 * cos(phi) * real(exp(1i * (ang+phi)));
+    yp = m10 + 2 * s10 * cos(phi) * imag(exp(1i * (ang)));
+else
+    c = 'NULL'
+    xp=0;
+    yp=0;
+    phi=0;
+end
+
+% figure,imshow(result),hold on
+% plot(xp,yp,'LineWidth',10);
+% plot(round(m01), round(m10), 'r*','Markersize', 20)
+% otp = [m01, m10, s01, s10, phi, m00];  
